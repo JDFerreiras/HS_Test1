@@ -1,0 +1,2128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url("App Background.png") center/cover no-repeat fixed;
+            overflow-x: hidden;
+        }
+
+        /* Landing Page Section */
+        .landing {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background: transparent;
+            z-index: 3;
+        }
+
+        .landing-fruits {
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            pointer-events: auto;
+            overflow: hidden;
+        }
+
+        .landing-fruits-landing {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: auto;
+            overflow: hidden;
+        }
+
+        .fruit {
+            position: absolute;
+            top: -120px;
+            left: var(--x, 50%);
+            width: var(--size, 90px);
+            height: auto;
+            opacity: 0.9;
+            animation: drop var(--duration, 8s) linear infinite;
+            animation-delay: var(--delay, 0s);
+            transform: translateX(-50%);
+            filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.15));
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .landing-fruits .fruit {
+            opacity: 0.63;
+        }
+
+        .fruit.touched-left {
+            animation: fly-left 0.9s ease forwards;
+        }
+
+        .fruit.touched-right {
+            animation: fly-right 0.9s ease forwards;
+        }
+
+        @keyframes fly-left {
+            to {
+                transform: translateX(-140vw) translateY(40px) rotate(-25deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes fly-right {
+            to {
+                transform: translateX(140vw) translateY(40px) rotate(25deg);
+                opacity: 0;
+            }
+        }
+
+        .fruit-counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.85);
+            color: #333;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            z-index: 4;
+            display: none;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .fruit-counter.visible {
+            display: inline-flex;
+        }
+
+        @keyframes drop {
+            0% {
+                transform: translateX(-50%) translateY(-140px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.9;
+            }
+            100% {
+                transform: translateX(-50%) translateY(115vh) rotate(360deg);
+                opacity: 0.9;
+            }
+        }
+
+        .landing-content {
+            text-align: center;
+            z-index: 3;
+            animation: fadeIn 1s ease-in;
+        }
+
+        .landing h1 {
+            font-size: 5rem;
+            color: white;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .landing-logo {
+            width: min(70vw, 360px);
+            height: auto;
+            display: block;
+            margin: 0 auto 2rem;
+            filter: none;
+        }
+
+        .landing p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            animation: bounce 2s infinite;
+        }
+
+        .sponsors {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 4;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sponsors-title {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .sponsors-logos {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sponsor-logo {
+            height: 54px;
+            width: auto;
+            display: block;
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.2));
+            transition: transform 0.2s ease;
+        }
+
+        .sponsor-logo--hs {
+            height: 70px;
+        }
+
+        .sponsors-logos a:hover .sponsor-logo {
+            transform: translateY(-2px);
+        }
+
+        .scroll-indicator svg {
+            width: 30px;
+            height: 30px;
+            stroke: white;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            50% {
+                transform: translateX(-50%) translateY(10px);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Parallax Background */
+        .parallax-bg {
+            position: absolute;
+            width: 100%;
+            height: 120%;
+            top: -10%;
+            left: 0;
+            background: url("App Background.png") center/cover no-repeat;
+            z-index: 1;
+            transform: translateY(0);
+            transition: transform 0.1s linear;
+        }
+
+        /* Info Panel Section */
+        .info-panel-section {
+            min-height: auto;
+            padding: 80px 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 3;
+            background: transparent;
+            margin-bottom: 0;
+            transition: margin-bottom 0.6s ease;
+        }
+
+        .info-panel-section.expanded {
+            margin-bottom: 40px;
+        }
+
+        .info-panel-image {
+            width: 250px;
+            height: auto;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .info-panel {
+            width: 100%;
+            max-width: 700px;
+            background: transparent;
+            border-radius: 20px;
+            padding: 0;
+            color: white;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(12px);
+            max-height: 0;
+            overflow: hidden;
+            transition: opacity 0.6s ease, transform 0.6s ease, max-height 0.6s ease, padding 0.6s ease;
+        }
+
+        .info-panel.revealed {
+            opacity: 1;
+            transform: translateY(0);
+            padding: 40px 30px;
+            max-height: 1200px;
+        }
+
+        .info-panel p {
+            margin-bottom: 1.5rem;
+        }
+
+        .info-panel ul {
+            list-style: none;
+            margin: 1.5rem auto;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .info-panel li {
+            margin-bottom: 0;
+            padding: 12px 20px;
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            opacity: 0;
+        }
+
+        .info-panel li:nth-child(odd) {
+            animation: slideFromLeft 0.6s ease forwards;
+        }
+
+        .info-panel li:nth-child(even) {
+            animation: slideFromRight 0.6s ease forwards;
+        }
+
+        .info-panel li:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .info-panel li:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .info-panel li:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .info-panel li:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .info-panel li:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        @keyframes slideFromLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-60px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideFromRight {
+            from {
+                opacity: 0;
+                transform: translateX(60px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .info-panel li:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            color: white;
+        }
+
+        /* Second Info Panel */
+        .info-panel-2-section {
+            min-height: auto;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 3;
+            background: transparent;
+            transition: padding-top 0.6s ease;
+        }
+
+        .info-panel-2-section.separated {
+            padding-top: 80px;
+        }
+
+        .info-panel-2-section.expanded {
+            padding: 0 20px 80px 20px;
+        }
+
+        .info-panel-2 {
+            width: 100%;
+            max-width: 700px;
+            background: transparent;
+            border-radius: 20px;
+            padding: 0;
+            color: white;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(12px);
+            max-height: 0;
+            overflow: hidden;
+            transition: opacity 0.6s ease, transform 0.6s ease, max-height 0.6s ease, padding 0.6s ease;
+        }
+
+        .info-panel-2.revealed {
+            opacity: 1;
+            transform: translateY(0);
+            padding: 20px 30px 40px;
+            max-height: 1200px;
+        }
+
+        .info-panel-2 h2 {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        .info-panel-2 p {
+            margin-bottom: 1.5rem;
+        }
+
+        .info-panel-2 ul {
+            list-style: none;
+            margin: 1.5rem auto;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .risk-panel ul {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            max-width: 520px;
+        }
+
+        @media (max-width: 600px) {
+            .risk-panel ul {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-panel-2 li {
+            margin-bottom: 0;
+            padding: 12px 20px;
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            opacity: 0;
+        }
+
+        .info-panel-2 li:nth-child(odd) {
+            animation: slideFromLeft 0.6s ease forwards;
+        }
+
+        .info-panel-2 li:nth-child(even) {
+            animation: slideFromRight 0.6s ease forwards;
+        }
+
+        .info-panel-2 li:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .info-panel-2 li:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .info-panel-2 li:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .info-panel-2 li:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            color: white;
+        }
+
+        /* Quiz Section */
+        .quiz-section {
+            min-height: 100vh;
+            background: transparent;
+            padding: 60px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            z-index: 3;
+        }
+
+        .info-card-section {
+            min-height: 100vh;
+            padding: 60px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 3;
+        }
+
+        .info-card {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .info-card img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .quiz-background {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .quiz-bg-img {
+            position: absolute;
+            width: 200px;
+            max-width: 40vw;
+            height: auto;
+            opacity: 0.8;
+            filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.2));
+        }
+
+        .quiz-bg-orange {
+            top: 40px;
+            right: -40px;
+            transform: rotate(-8deg);
+        }
+
+        .quiz-bg-avo {
+            bottom: 20px;
+            left: -30px;
+            transform: rotate(6deg);
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 20px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            position: relative;
+            z-index: 2;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .quiz-header h2 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .quiz-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .question-container {
+            margin-bottom: 50px;
+        }
+
+        .question-text {
+            color: #333;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .likert-scale {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .likert-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .likert-option input[type="radio"] {
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            accent-color: #667eea;
+        }
+
+        .likert-option label {
+            cursor: pointer;
+            font-size: 0.85rem;
+            text-align: center;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .likert-option input[type="radio"]:checked + label {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .scale-labels {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+            padding-top: 10px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .scale-label {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #999;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Start Quiz Button */
+        .comenzar-btn {
+            padding: 18px 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 40px 0;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .comenzar-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+        }
+
+        .comenzar-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .quiz-section.hidden {
+            display: none;
+        }
+
+        /* Results Section */
+        .results-section {
+            min-height: 100vh;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 3;
+        }
+
+        .results-container {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 30px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+
+        .score-mascot {
+            position: absolute;
+            bottom: 0;
+            right: 12px;
+            width: 140px;
+            height: auto;
+            display: none;
+            pointer-events: none;
+        }
+
+        .score-mascot.visible {
+            display: block;
+        }
+
+        .results-container h2 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .score-display {
+            font-size: 4rem;
+            font-weight: 700;
+            color: #667eea;
+            margin: 30px 0;
+            text-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .score-green {
+            color: #2e7d32;
+        }
+
+        .score-yellow {
+            color: #f9a825;
+        }
+
+        .score-orange {
+            color: #ef6c00;
+        }
+
+        .score-red {
+            color: #c62828;
+        }
+
+        .score-info {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .score-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .score-bar-fill.score-green {
+            background: linear-gradient(90deg, #2e7d32 0%, #66bb6a 100%);
+        }
+
+        .score-bar-fill.score-yellow {
+            background: linear-gradient(90deg, #f9a825 0%, #ffd54f 100%);
+        }
+
+        .score-bar-fill.score-orange {
+            background: linear-gradient(90deg, #ef6c00 0%, #ffb74d 100%);
+        }
+
+        .score-bar-fill.score-red {
+            background: linear-gradient(90deg, #c62828 0%, #ef5350 100%);
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .email-results {
+            margin: 20px 0 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .email-optin {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: #444;
+            font-weight: 600;
+        }
+
+        .email-fields {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .email-fields input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #d9d9d9;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .email-send-btn {
+            width: 100%;
+            padding: 12px 14px;
+            background: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .email-send-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(46, 125, 50, 0.3);
+        }
+
+        .email-status {
+            min-height: 20px;
+            font-size: 0.9rem;
+            color: #444;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .landing h1 {
+                font-size: 3.5rem;
+            }
+
+            .landing p {
+                font-size: 1rem;
+            }
+
+            .quiz-container {
+                padding: 30px 15px;
+            }
+
+            .quiz-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .question-text {
+                font-size: 1rem;
+            }
+
+            .likert-scale {
+                gap: 10px;
+            }
+
+            .likert-option input[type="radio"] {
+                width: 24px;
+                height: 24px;
+            }
+
+            .results-container {
+                padding: 40px 20px;
+            }
+
+            .score-display {
+                font-size: 3rem;
+            }
+
+            .landing-logo {
+                width: min(80vw, 320px);
+            }
+
+            .fruit {
+                width: var(--size, 70px);
+            }
+
+            .quiz-bg-img {
+                width: 150px;
+                opacity: 0.7;
+            }
+
+            .question-container {
+                margin-bottom: 40px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .landing h1 {
+                font-size: 2.5rem;
+            }
+
+            .quiz-container {
+                padding: 20px 15px;
+            }
+
+            .likert-scale {
+                gap: 8px;
+            }
+
+            .likert-option input[type="radio"] {
+                width: 28px;
+                height: 28px;
+                cursor: pointer;
+            }
+
+            .likert-option label {
+                font-size: 0.75rem;
+                padding: 5px;
+            }
+
+            .scale-label {
+                font-size: 0.65rem;
+            }
+
+            .landing-logo {
+                width: min(85vw, 280px);
+            }
+
+            .fruit {
+                width: var(--size, 60px);
+            }
+
+            .quiz-bg-img {
+                width: 120px;
+                opacity: 0.6;
+            }
+
+            .sponsor-logo {
+                height: 44px;
+            }
+
+            .question-container {
+                margin-bottom: 35px;
+            }
+
+            .question-text {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .croissant-section {
+                min-height: 45vh;
+                padding: 30px 10px;
+            }
+
+            .croissant-container {
+                height: 280px;
+                padding: 0 20px;
+            }
+
+            .croissant-left,
+            .croissant-right {
+                max-width: 195px;
+            }
+
+            .croissant-container.active .croissant-left {
+                transform: translateX(-85px);
+            }
+
+            .croissant-container.active .croissant-right {
+                transform: translateX(75px);
+            }
+
+            .hidden-message {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Croissant Section */
+        .croissant-section {
+            min-height: 65vh;
+            background: transparent;
+            padding: 60px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 3;
+        }
+
+        .croissant-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background: transparent;
+            border-radius: 0;
+            overflow: visible;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* Left croissant half */
+        .croissant-left {
+            position: absolute;
+            width: 60%;
+            max-width: 300px;
+            height: auto;
+            right: 40%;
+            transform: translateX(0);
+            transform-origin: center;
+            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2));
+            z-index: 2;
+        }
+
+        /* Right croissant half */
+        .croissant-right {
+            position: absolute;
+            width: 60%;
+            max-width: 300px;
+            height: auto;
+            left: 40%;
+            transform: translateX(0);
+            transform-origin: center;
+            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2));
+            z-index: 1;
+        }
+
+        /* Hidden message */
+        .hidden-message {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.6s ease 0.3s;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+        }
+
+        /* Active state - when croissant splits */
+        .croissant-container.active .croissant-left {
+            transform: translateX(-145px);
+        }
+
+        .croissant-container.active .croissant-right {
+            transform: translateX(130px);
+        }
+
+        .croissant-container.active .hidden-message {
+            opacity: 1;
+        }
+
+        .croissant-tab {
+            position: absolute;
+            width: 120px;
+            height: auto;
+            top: -40px;
+            left: 5%;
+            transform: rotate(-20deg);
+            z-index: 5;
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2));
+        }
+
+        @media (max-width: 768px) {
+            .croissant-tab {
+                width: 100px;
+                top: -30px;
+                left: 8%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .croissant-tab {
+                width: 80px;
+                top: -25px;
+                left: 10%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .croissant-section {
+                min-height: 55vh;
+                padding: 50px 20px;
+            }
+
+            .croissant-container {
+                height: 320px;
+                padding: 0 30px;
+            }
+
+            .croissant-left,
+            .croissant-right {
+                max-width: 260px;
+            }
+
+            .croissant-container.active .croissant-left {
+                transform: translateX(-120px);
+            }
+
+            .croissant-container.active .croissant-right {
+                transform: translateX(110px);
+            }
+
+            .hidden-message {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .croissant-section {
+                min-height: 50vh;
+                padding: 40px 15px;
+            }
+
+            .croissant-container {
+                height: 300px;
+                padding: 0 25px;
+            }
+
+            .croissant-left,
+            .croissant-right {
+                max-width: 240px;
+            }
+
+            .croissant-container.active .croissant-left {
+                transform: translateX(-100px);
+            }
+
+            .croissant-container.active .croissant-right {
+                transform: translateX(90px);
+            }
+
+            .hidden-message {
+                font-size: 1.3rem;
+            }
+        }
+
+        /* Napkin/Plate Section */
+        .napkin-section {
+            min-height: 60vh;
+            padding: 0 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 3;
+            background: transparent;
+        }
+
+        .napkin-window {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            height: 420px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .napkin-img,
+        .plate-img {
+            position: absolute;
+            width: 80%;
+            max-width: 520px;
+            height: auto;
+            transition: transform 0.6s ease, opacity 0.6s ease;
+        }
+
+        .plate-img {
+            z-index: 2;
+        }
+
+        .napkin-img {
+            z-index: 1;
+        }
+
+        .napkin-window.split .napkin-img {
+            transform: translateX(-180px);
+            opacity: 0.95;
+        }
+
+        .napkin-window.split .plate-img {
+            transform: translateX(180px);
+            opacity: 0.95;
+        }
+
+        @media (max-width: 768px) {
+            .napkin-window {
+                height: 340px;
+            }
+
+            .napkin-img,
+            .plate-img {
+                width: 85%;
+                max-width: 440px;
+            }
+
+            .napkin-window.split .napkin-img {
+                transform: translateX(-150px);
+            }
+
+            .napkin-window.split .plate-img {
+                transform: translateX(150px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .napkin-section {
+                padding: 20px 15px 50px;
+            }
+
+            .napkin-window {
+                height: 280px;
+            }
+
+            .napkin-img,
+            .plate-img {
+                width: 90%;
+                max-width: 340px;
+            }
+
+            .napkin-window.split .napkin-img {
+                transform: translateX(-110px);
+            }
+
+            .napkin-window.split .plate-img {
+                transform: translateX(110px);
+            }
+        }
+
+        /* Prop Section */
+        .prop-section {
+            min-height: 50vh;
+            padding: 20px 20px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 3;
+            background: transparent;
+        }
+
+        .prop-image {
+            width: 100%;
+            max-width: 980px;
+            height: auto;
+            display: block;
+        }
+
+        .prop-section-full {
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .prop-section-full .prop-image {
+            max-width: none;
+            width: 100vw;
+            margin-left: calc(50% - 50vw);
+            margin-right: calc(50% - 50vw);
+        }
+
+        @media (max-width: 768px) {
+            .prop-section {
+                padding: 30px 15px 40px;
+            }
+
+            .prop-image {
+                max-width: 840px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Landing Page -->
+    <section class="landing" id="landing">
+        <div class="parallax-bg"></div>
+        <div class="landing-fruits-landing" aria-hidden="true">
+            <img src="Orange.png" alt="" class="fruit" style="--x: 20%; --size: 110px; --delay: -1s; --duration: 9s;">
+            <img src="Avo.png" alt="" class="fruit" style="--x: 40%; --size: 120px; --delay: -4s; --duration: 11s;">
+            <img src="Blueberry.png" alt="" class="fruit" style="--x: 65%; --size: 90px; --delay: -2s; --duration: 8s;">
+            <img src="Orange.png" alt="" class="fruit" style="--x: 85%; --size: 105px; --delay: -6s; --duration: 10s;">
+            <img src="Avo.png" alt="" class="fruit" style="--x: 55%; --size: 115px; --delay: -8s; --duration: 12s;">
+            <img src="Blueberry.png" alt="" class="fruit" style="--x: 30%; --size: 85px; --delay: -3s; --duration: 7s;">
+            <img src="Orange.png" alt="" class="fruit" style="--x: 75%; --size: 100px; --delay: -5s; --duration: 9s;">
+            <img src="Blueberry.png" alt="" class="fruit" style="--x: 50%; --size: 80px; --delay: -7s; --duration: 8s;">
+            <img src="Waffle.png" alt="" class="fruit" style="--x: 15%; --size: 115px; --delay: -9s; --duration: 12s;">
+            <img src="Bacon.png" alt="" class="fruit" style="--x: 95%; --size: 105px; --delay: -10s; --duration: 11s;">
+        </div>
+        <div class="fruit-counter" id="fruitCounter">
+            <span id="fruitCount">0</span>
+        </div>
+        <div class="landing-content">
+            <img src="Sabeslogo.png" alt="Sabes Logo" class="landing-logo">
+            <p>Scroll down to begin</p>
+        </div>
+        <div class="sponsors">
+            <div class="sponsors-logos">
+                <a href="https://www.instagram.com/greenismythingrd/" target="_blank" rel="noopener noreferrer">
+                    <img src="Greenismything.png" alt="Green Is My Thing" class="sponsor-logo">
+                </a>
+                <a href="https://www.instagram.com/mrmrscoffeerd/" target="_blank" rel="noopener noreferrer">
+                    <img src="Mr&Miss.png" alt="Mr & Mrs Coffee" class="sponsor-logo">
+                </a>
+                <a href="https://www.instagram.com/raices_eb/" target="_blank" rel="noopener noreferrer">
+                    <img src="Raices.png" alt="Raices" class="sponsor-logo">
+                </a>
+                <a href="https://www.instagram.com/psi.hilarysolano/" target="_blank" rel="noopener noreferrer">
+                    <img src="HS-LOGO-6.png" alt="HS Logo" class="sponsor-logo sponsor-logo--hs">
+                </a>
+                <a href="https://www.instagram.com/psi.diegoferreiras/" target="_blank" rel="noopener noreferrer">
+                    <img src="DF.png" alt="DF" class="sponsor-logo">
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Info Panel Section -->
+    <section class="info-panel-section" id="infoPanelSection">
+        <div class="croissant-container" id="croissantContainer">
+            <img src="break.png" alt="Break" class="croissant-tab">
+            <img src="CroissantL.png" alt="Croissant Left Half" class="croissant-left">
+            <img src="CroissantR.png" alt="Croissant Right Half" class="croissant-right">
+            <div class="hidden-message"><img src="Quees.png" alt="Quees" style="max-width: 100%; height: auto; max-height: 150px; margin-top: -30px;"></div>
+        </div>
+        <audio id="croissantSound" src="CROISANT SOUND.MP3" preload="auto"></audio>
+        <div class="info-panel" id="infoPanelContent">
+            <p><strong>La relación con la comida</strong> no se trata solo de lo que comemos.</p>
+            <p>También incluye <strong>emociones, recuerdos, aprendizajes, cultura</strong> y formas de vincularnos con los demás.</p>
+            <p style="margin-top: 2rem;">Muchas personas aprendieron a usar la comida para:</p>
+            <ul>
+                <li>Regular emociones</li>
+                <li>Expresar amor</li>
+                <li>Celebrar</li>
+                <li>Calmar el malestar</li>
+                <li>Sentirse acompañadas</li>
+            </ul>
+            <p style="margin-top: 2rem;"><strong>Nada de esto significa que estés "mal".</strong></p>
+            <p>Significa que tu relación con la comida tiene una <strong>historia.</strong></p>
+        </div>
+    </section>
+
+    <!-- Prop Section -->
+    <section class="prop-section" id="propSection">
+        <img src="Prop1.1.png" alt="Prop 1" class="prop-image">
+    </section>
+
+    <!-- Prop 2 Section -->
+    <section class="prop-section prop-section-full" id="prop2Section">
+        <img src="prop2.png" alt="Prop 2" class="prop-image">
+    </section>
+
+    <!-- Risk Text Section -->
+    <section class="info-panel-2-section" id="riskTextSection">
+        <div class="info-panel-2 revealed risk-panel">
+            <p>Pero cuando la comida se convierte en:</p>
+            <ul>
+                <li>Premio.</li>
+                <li>Castigo.</li>
+                <li>Consuelo exclusivo.</li>
+                <li>Forma principal de expresar afecto.</li>
+                <li>Mecanismo para manejar emociones.</li>
+                <li>Herramienta constante de control.</li>
+            </ul>
+            <p>Estamos hablando de conductas alimentarias de riesgo normalizadas.</p>
+            <p>Son comportamientos que, sin necesariamente constituir un Trastorno de la Conducta Alimentaria, pueden aumentar la vulnerabilidad a desarrollar una relación problemática con la comida.</p>
+            <p><strong>Prestar atención no significa alarmarse.</strong></p>
+            <p><strong>Significa observar.</strong></p>
+            <p><strong>Y observar es el primer paso para cuidar.</strong></p>
+        </div>
+    </section>
+
+    <!-- Napkin/Plate Section -->
+    <section class="napkin-section" id="napkinSection">
+        <div class="napkin-window" id="napkinWindow">
+            <img src="napkin.png" alt="Napkin" class="napkin-img">
+            <img src="paraqueplate.png" alt="Paraque Plate" class="plate-img">
+        </div>
+    </section>
+
+    <!-- Second Info Panel Section -->
+    <section class="info-panel-2-section" id="infoPanel2Section">
+        <div class="info-panel-2" id="infoPanel2Content">
+            <p>Esta autoevaluación es un espacio de reflexión, no un examen ni un diagnóstico.</p>
+            <p>Su objetivo es ayudarte a:</p>
+            <ul>
+                <li>Observar cómo te relacionas hoy con la comida</li>
+                <li>Identificar qué funciones cumple en tu vida</li>
+                <li>Reconocer si hay áreas que necesitan más cuidado o atención</li>
+            </ul>
+            <p style="margin-top: 2rem;">No busca etiquetarte, corregirte ni decirte qué hacer.</p>
+            <p><strong>Busca invitarte a escucharte.</strong></p>
+            <p style="margin-top: 2rem;">Te invitamos a responder desde <strong>la honestidad y la curiosidad, no desde el juicio.</strong></p>
+        </div>
+    </section>
+
+    <!-- Comenzar Button -->
+    <section style="min-height: 50vh; display: flex; align-items: center; justify-content: center; position: relative; z-index: 3;">
+        <button class="comenzar-btn" id="comenzarBtn">Comenzar</button>
+    </section>
+
+    <!-- Quiz Section -->
+    <section class="quiz-section hidden" id="quizSection">
+        <div class="quiz-background">
+            <img src="Orange.png" alt="Orange" class="quiz-bg-img quiz-bg-orange">
+            <img src="Avo.png" alt="Avocado" class="quiz-bg-img quiz-bg-avo">
+            <img src="Blueberry.png" alt="Blueberry" class="quiz-bg-img" style="top: 25%; left: -40px; transform: rotate(-6deg);">
+            <img src="Waffle.png" alt="Waffle" class="quiz-bg-img" style="top: 8%; right: -30px; transform: rotate(5deg);">
+            <img src="Bacon.png" alt="Bacon" class="quiz-bg-img" style="bottom: 12%; right: -40px; transform: rotate(-8deg);">
+            <img src="egg.png" alt="Egg" class="quiz-bg-img" style="bottom: 5%; left: -35px; transform: rotate(7deg);">
+            <img src="Banana.png" alt="Banana" class="quiz-bg-img" style="top: 55%; right: -20px; transform: rotate(12deg);">
+        </div>
+        <div class="quiz-container">
+            <div class="quiz-header">
+                <h2>Cuestionario</h2>
+                <p>Selecciona la opción que mejor te represente</p>
+                <p>Responde según cómo te has sentido en las últimas 4 semanas.</p>
+                <p>Escala: 0 = Nunca | 1 = Rara vez | 2 = A veces | 3 = Frecuentemente | 4 = Casi siempre</p>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <form id="quizForm">
+                <!-- Questions will be generated here by JavaScript -->
+            </form>
+
+            <button class="submit-btn" id="submitBtn">Submit Quiz</button>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="results-section" id="resultsSection" class="hidden">
+        <div class="results-container">
+            <h2>Resultados</h2>
+            <div class="score-display" id="scoreDisplay">0</div>
+            <div class="score-info">
+                <p id="scoreInfo">de 64 puntos posibles</p>
+                <p id="scorePercentage"></p>
+            </div>
+            <div class="score-bar">
+                <div class="score-bar-fill" id="scoreBarFill" style="width: 0%"></div>
+            </div>
+            <form class="email-results" id="emailResultsForm">
+                <label class="email-optin">
+                    <input type="checkbox" id="emailOptIn">
+                    ¿Deseas conservar este resultado?
+                </label>
+                <label class="email-optin">
+                    <input type="checkbox" id="emailAcknowledge">
+                    Reconozco que esto no es una prueba psicométrica ni diagnóstica, y que sus resultados no contienen criterio clínico diagnóstico.
+                </label>
+                <div class="email-fields hidden" id="emailFields">
+                    <input type="email" id="resultsEmail" placeholder="Tu email" autocomplete="email">
+                    <button type="submit" class="email-send-btn">Enviar resultados</button>
+                    <div class="email-status" id="emailStatus"></div>
+                </div>
+            </form>
+            <div id="scoreInterpretation" class="score-info"></div>
+            <img id="scoreMascot" class="score-mascot" src="" alt="">
+            <button class="restart-btn" id="restartBtn">Restart Quiz</button>
+            <p style="color: #333; text-align: center; margin-top: 30px; margin-bottom: 10px; font-size: 1.1rem; line-height: 1.6; font-weight: 500;">Un regalito hecho con cariño, gracias a marcas que creen y apuestan por la salud mental tanto como nosotros.</p>
+            <img src="Cupones.png" alt="Cupones" style="max-width: 100%; width: 500px; height: auto; margin-top: 20px; border-radius: 15px;">
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+        const questions = [
+            "1: Relación emocional con la comida",
+            "Como para regular emociones (estrés, tristeza, soledad).",
+            "Siento culpa o juicio después de comer ciertos alimentos.",
+            "Uso la comida como principal forma de consuelo o premio.",
+            "Siento ansiedad anticipando eventos sociales con comida.",
+            "2: Conexión corporal",
+            "Me cuesta identificar hambre y saciedad.",
+            "Suelo comer rápido o de forma automática.",
+            "Ignoro señales físicas por horarios, reglas o culpa.",
+            "Siento desconexión de mi cuerpo al comer.",
+            "3: Significado afectivo de la comida",
+            "Siento que demostrar amor implica casi siempre comida.",
+            "Me cuesta recibir cariño si no viene acompañado de comida.",
+            "Uso la comida para evitar conversaciones o emociones.",
+            "Asocio celebraciones únicamente con comer.",
+            "4: Flexibilidad y cuidado",
+            "Puedo disfrutar la comida sin extremos (control o descontrol).",
+            "Puedo elegir no comer algo sin sentir culpa.",
+            "Reconozco otras formas de autocuidado además de la comida.",
+            "Me permito pedir apoyo cuando lo necesito."
+        ];
+
+        const maxScore = (questions.length - 4) * 4; // 4 is the max value per question, excluding section headers
+        let answers = {};
+        const emailjsConfig = {
+            serviceId: 'service_owq7au8',
+            templateId: 'template_clq26nh',
+            publicKey: 'q8IwIGnbOWbz7z85m'
+        };
+        let lastResultPayload = null;
+
+        // Initialize quiz
+        function initQuiz() {
+            const quizForm = document.getElementById('quizForm');
+            quizForm.innerHTML = '';
+
+            questions.forEach((question, index) => {
+                const isHeader = question.startsWith("1:") || question.startsWith("2:") || question.startsWith("3:") || question.startsWith("4:");
+                if (isHeader) {
+                    const header = document.createElement('div');
+                    header.className = 'question-text';
+                    header.style.marginTop = '20px';
+                    header.style.fontSize = '1rem';
+                    header.style.fontWeight = '700';
+                    header.textContent = question;
+                    quizForm.appendChild(header);
+                    return;
+                }
+                const questionContainer = document.createElement('div');
+                questionContainer.className = 'question-container';
+                questionContainer.innerHTML = `
+                    <div class="question-text">${question}</div>
+                    <div class="likert-scale">
+                        <div class="likert-option">
+                            <input type="radio" id="q${index}_0" name="question${index}" value="0" required>
+                            <label for="q${index}_0">Nunca</label>
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" id="q${index}_1" name="question${index}" value="1" required>
+                            <label for="q${index}_1">Rara vez</label>
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" id="q${index}_2" name="question${index}" value="2" required>
+                            <label for="q${index}_2">A veces</label>
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" id="q${index}_3" name="question${index}" value="3" required>
+                            <label for="q${index}_3">Frecuentemente</label>
+                        </div>
+                        <div class="likert-option">
+                            <input type="radio" id="q${index}_4" name="question${index}" value="4" required>
+                            <label for="q${index}_4">Casi siempre</label>
+                        </div>
+                    </div>
+                `;
+                quizForm.appendChild(questionContainer);
+            });
+
+            // Add scale labels
+            const scaleLabelsDiv = document.createElement('div');
+            scaleLabelsDiv.className = 'scale-labels';
+            scaleLabelsDiv.innerHTML = `
+                <div class="scale-label">Nunca</div>
+                <div class="scale-label">Rara vez</div>
+                <div class="scale-label">A veces</div>
+                <div class="scale-label">Frecuentemente</div>
+                <div class="scale-label">Casi siempre</div>
+            `;
+            quizForm.appendChild(scaleLabelsDiv);
+
+            // Add event listeners to track changes
+            const inputs = quizForm.querySelectorAll('input[type="radio"]');
+            inputs.forEach(input => {
+                input.addEventListener('change', updateProgress);
+            });
+
+            updateProgress();
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const form = document.getElementById('quizForm');
+            const checkedInputs = form.querySelectorAll('input[type="radio"]:checked');
+            const totalQuestions = questions.filter(q => !q.startsWith("1:") && !q.startsWith("2:") && !q.startsWith("3:") && !q.startsWith("4:")).length;
+            const progress = (checkedInputs.length / totalQuestions) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        // Handle form submission
+        document.getElementById('submitBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+
+            const form = document.getElementById('quizForm');
+            const inputs = form.querySelectorAll('input[type="radio"]:checked');
+            const totalQuestions = questions.filter(q => !q.startsWith("1:") && !q.startsWith("2:") && !q.startsWith("3:") && !q.startsWith("4:")).length;
+
+            if (inputs.length !== totalQuestions) {
+                alert('Please answer all questions before submitting.');
+                return;
+            }
+
+            // Calculate score
+            let totalScore = 0;
+            inputs.forEach(input => {
+                totalScore += parseInt(input.value);
+            });
+
+            // Show results
+            showResults(totalScore);
+        });
+
+        // Show results
+        function showResults(score) {
+            const percentage = ((score / maxScore) * 100).toFixed(1);
+            const interpretation = document.getElementById('scoreInterpretation');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const scoreBarFill = document.getElementById('scoreBarFill');
+            const scoreMascot = document.getElementById('scoreMascot');
+            const colorClasses = ['score-green', 'score-yellow', 'score-orange', 'score-red'];
+            let interpretationHtml = '';
+            
+            scoreDisplay.textContent = score;
+            document.getElementById('scoreInfo').textContent = `de ${maxScore} puntos posibles`;
+            document.getElementById('scorePercentage').textContent = `${percentage}%`;
+            scoreBarFill.style.width = percentage + '%';
+            scoreBarFill.textContent = percentage + '%';
+
+            scoreDisplay.classList.remove(...colorClasses);
+            scoreBarFill.classList.remove(...colorClasses);
+            scoreMascot.classList.remove('visible');
+
+            if (score <= 16) {
+                scoreDisplay.classList.add('score-green');
+                scoreBarFill.classList.add('score-green');
+                scoreMascot.src = 'green ghost.png';
+                scoreMascot.alt = 'Green ghost';
+                scoreMascot.classList.add('visible');
+                interpretationHtml = `
+                    <p><strong>Score: 0-16</strong></p>
+                    <p><strong>Buena conexión cuerpo–emoción</strong></p>
+                    <p>Flexibilidad en la relación con la comida</p>
+                    <p>La comida no ocupa un rol central para regular emociones</p>
+                    <p>Tu relación con la comida muestra conciencia y equilibrio.</p>
+                    <p>Seguir explorando formas diversas de autocuidado y expresión emocional fortalece este vínculo.</p>
+                `;
+            } else if (score <= 32) {
+                scoreDisplay.classList.add('score-yellow');
+                scoreBarFill.classList.add('score-yellow');
+                scoreMascot.src = 'Yellow ghost.png';
+                scoreMascot.alt = 'Yellow ghost';
+                scoreMascot.classList.add('visible');
+                interpretationHtml = `
+                    <p><strong>Score 17-32</strong></p>
+                    <p>La comida cumple funciones emocionales en momentos puntuales</p>
+                    <p>Aparece culpa o automatismo ocasional</p>
+                    <p>Aún hay recursos internos presentes</p>
+                    <p>Hay señales de que la comida cumple funciones emocionales importantes en algunos momentos.</p>
+                    <p>Observar estas señales con curiosidad —sin juicio— puede ayudarte a cuidarte mejor.</p>
+                `;
+            } else if (score <= 48) {
+                scoreDisplay.classList.add('score-orange');
+                scoreBarFill.classList.add('score-orange');
+                scoreMascot.src = 'orange ghost.png';
+                scoreMascot.alt = 'Orange ghost';
+                scoreMascot.classList.add('visible');
+                interpretationHtml = `
+                    <p><strong>33–48 puntos</strong></p>
+                    <p>Alta carga emocional asociada a la comida</p>
+                    <p>Rigidez, culpa o ansiedad frecuente</p>
+                    <p>La comida puede estar reemplazando otras formas de regulación</p>
+                    <p>La comida parece estar cargada de presión emocional.</p>
+                    <p>Contar con acompañamiento psicológico puede ayudarte a comprender qué está pasando y ampliar tus recursos de cuidado.</p>
+                `;
+            } else {
+                scoreDisplay.classList.add('score-red');
+                scoreBarFill.classList.add('score-red');
+                scoreMascot.src = 'red ghost.png';
+                scoreMascot.alt = 'Red ghost';
+                scoreMascot.classList.add('visible');
+                interpretationHtml = `
+                    <p><strong>49–64</strong></p>
+                    <p>Malestar significativo asociado a la comida</p>
+                    <p>Uso frecuente de la comida como regulador emocional</p>
+                    <p>Poca flexibilidad o desconexión corporal</p>
+                    <p>Tu relación con la comida podría estar generando malestar importante en tu bienestar emocional.</p>
+                    <p>Pedir ayuda profesional es una forma válida y valiente de cuidarte.</p>
+                `;
+            }
+
+            interpretation.innerHTML = interpretationHtml;
+            const interpretationText = interpretation.textContent.trim();
+            
+            // Determine color and mascot
+            let colorClass = 'green';
+            let colorHex = '#2e7d32';
+            let mascotUrl = window.location.origin + window.location.pathname.replace('index.html', '') + scoreMascot.src.split('/').pop();
+            
+            if (score <= 16) {
+                colorClass = 'green';
+                colorHex = '#2e7d32';
+            } else if (score <= 32) {
+                colorClass = 'yellow';
+                colorHex = '#f9a825';
+            } else if (score <= 48) {
+                colorClass = 'orange';
+                colorHex = '#ef6c00';
+            } else {
+                colorClass = 'red';
+                colorHex = '#c62828';
+            }
+            
+            lastResultPayload = {
+                score,
+                percentage,
+                interpretation: interpretationText,
+                interpretationHtml: interpretationHtml,
+                mascotUrl: mascotUrl,
+                colorClass: colorClass,
+                colorHex: colorHex,
+                date: new Date().toLocaleDateString('es-ES')
+            };
+
+            // Hide quiz, show results
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').classList.remove('hidden');
+            document.getElementById('resultsSection').style.display = 'flex';
+
+            // Scroll to results
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Restart quiz
+        document.getElementById('restartBtn').addEventListener('click', () => {
+            const quizSection = document.getElementById('quizSection');
+            quizSection.classList.remove('hidden');
+            quizSection.style.display = 'flex';
+            document.getElementById('resultsSection').classList.add('hidden');
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('quizForm').reset();
+            updateProgress();
+            quizSection.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Parallax effect
+        window.addEventListener('scroll', () => {
+            const parallax = document.querySelector('.parallax-bg');
+            const scrolled = window.pageYOffset;
+            if (parallax) {
+                parallax.style.transform = `translateY(${scrolled * 0.25}px)`;
+            }
+        });
+
+        // Fruit tap interaction
+        function initFruitClicks() {
+            const fruits = document.querySelectorAll('.fruit');
+            const counter = document.getElementById('fruitCounter');
+            const countEl = document.getElementById('fruitCount');
+            let count = 0;
+
+            fruits.forEach(fruit => {
+                fruit.addEventListener('click', () => {
+                    if (fruit.classList.contains('touched-left') || fruit.classList.contains('touched-right')) {
+                        return;
+                    }
+
+                    const rect = fruit.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const goLeft = centerX < window.innerWidth / 2;
+
+                    fruit.classList.add(goLeft ? 'touched-left' : 'touched-right');
+                    fruit.style.pointerEvents = 'none';
+
+                    count += 1;
+                    countEl.textContent = count;
+                    counter.classList.add('visible');
+                });
+            });
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            if (window.emailjs) {
+                emailjs.init({ publicKey: emailjsConfig.publicKey });
+            }
+            initQuiz();
+            initFruitClicks();
+            initListScrollAnimation();
+            initList2ScrollAnimation();
+
+            const emailOptIn = document.getElementById('emailOptIn');
+            const emailAcknowledge = document.getElementById('emailAcknowledge');
+            const emailFields = document.getElementById('emailFields');
+            const emailForm = document.getElementById('emailResultsForm');
+            const emailInput = document.getElementById('resultsEmail');
+            const emailStatus = document.getElementById('emailStatus');
+
+            if (emailOptIn && emailFields) {
+                emailOptIn.addEventListener('change', () => {
+                    emailFields.classList.toggle('hidden', !emailOptIn.checked);
+                });
+            }
+
+            if (emailForm && emailInput && emailStatus) {
+                emailForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+
+                    if (!emailOptIn || !emailOptIn.checked) {
+                        emailStatus.textContent = 'Selecciona la opción para conservar el resultado.';
+                        return;
+                    }
+
+                    if (!emailAcknowledge || !emailAcknowledge.checked) {
+                        emailStatus.textContent = 'Debes aceptar el aviso para continuar.';
+                        return;
+                    }
+
+                    const emailValue = emailInput.value.trim();
+                    if (!emailValue || !emailValue.includes('@')) {
+                        emailStatus.textContent = 'Ingresa un email válido.';
+                        return;
+                    }
+
+                    if (!lastResultPayload) {
+                        emailStatus.textContent = 'Primero completa el cuestionario.';
+                        return;
+                    }
+
+                    emailStatus.textContent = 'Enviando...';
+
+                    // Use custom domain URL for mascot
+                    const baseUrl = 'https://previenetca.com/';
+                    const mascotUrl = baseUrl + lastResultPayload.mascotUrl.split('/').pop();
+                    
+                    // Create cupones HTML text instead of image for better email compatibility
+                    const cuponesHtml = `
+                        <div style="background: #f8f8f8; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                            <div style="background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 4px solid #4CAF50;">
+                                <h3 style="margin: 0 0 10px 0; color: #4CAF50;">GREEN IS MY THING</h3>
+                                <p style="margin: 5px 0; font-size: 16px;"><strong>5% de descuento</strong> en tus compras</p>
+                                <p style="margin: 5px 0; font-size: 14px; color: #666;">Válido hasta febrero 28, 2026</p>
+                            </div>
+                            <div style="background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 4px solid #8B4513;">
+                                <h3 style="margin: 0 0 10px 0; color: #8B4513;">MR & MRS COFFEE</h3>
+                                <p style="margin: 5px 0; font-size: 16px;"><strong>Capuchino de cortesía</strong></p>
+                                <p style="margin: 5px 0; font-size: 14px; color: #666;">Válido hasta febrero 28, 2026</p>
+                            </div>
+                            <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #FF6B6B;">
+                                <h3 style="margin: 0 0 10px 0; color: #FF6B6B;">RAÍCES - Escuela de Baile</h3>
+                                <p style="margin: 5px 0; font-size: 16px;"><strong>Clase de cortesía</strong></p>
+                                <p style="margin: 5px 0; font-size: 16px;">Inscripción: <strong>$1,500</strong> en lugar de $2,000</p>
+                                <p style="margin: 5px 0; font-size: 14px; color: #666;">Válido hasta febrero 28, 2026</p>
+                            </div>
+                        </div>
+                    `;
+
+                    // Send email with HTML cupones
+                    emailjs.send(emailjsConfig.serviceId, emailjsConfig.templateId, {
+                        to_email: emailValue,
+                        score: lastResultPayload.score,
+                        max_score: maxScore,
+                        percentage: lastResultPayload.percentage,
+                        color_hex: lastResultPayload.colorHex,
+                        mascot_url: mascotUrl,
+                        cupones_html: cuponesHtml,
+                        interpretation: lastResultPayload.interpretationHtml,
+                        date: lastResultPayload.date
+                    }).then(() => {
+                        emailStatus.textContent = 'Resultados enviados.';
+                    }).catch((error) => {
+                        console.error('Email error:', error);
+                        emailStatus.textContent = 'No se pudo enviar el email. Intenta otra vez.';
+                    });
+                });
+            }
+
+            // Comenzar button click handler
+            const comenzarBtn = document.getElementById('comenzarBtn');
+            if (comenzarBtn) {
+                comenzarBtn.addEventListener('click', () => {
+                    const quizSection = document.getElementById('quizSection');
+                    quizSection.classList.remove('hidden');
+                    quizSection.scrollIntoView({ behavior: 'smooth' });
+                });
+            }
+        });
+
+        // Scroll animation for list items
+        function initListScrollAnimation() {
+            const listItems = document.querySelectorAll('.info-panel li');
+            
+            const observerOptions = {
+                threshold: 0.5,
+                rootMargin: '0px 0px -100px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            listItems.forEach((item, index) => {
+                item.style.opacity = '0';
+                observer.observe(item);
+            });
+        }
+
+        // Scroll animation for second list items
+        function initList2ScrollAnimation() {
+            const list2Items = document.querySelectorAll('.info-panel-2 li');
+            
+            const observerOptions = {
+                threshold: 0.5,
+                rootMargin: '0px 0px -100px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            list2Items.forEach((item, index) => {
+                item.style.opacity = '0';
+                observer.observe(item);
+            });
+        }
+
+        // Croissant interaction
+        const croissantContainer = document.getElementById('croissantContainer');
+        const croissantSound = document.getElementById('croissantSound');
+        const infoPanelContent = document.getElementById('infoPanelContent');
+        const infoPanelSection = document.getElementById('infoPanelSection');
+        const infoPanel2Section = document.getElementById('infoPanel2Section');
+        let croissantSoundTimer;
+        if (croissantContainer) {
+            const playCroissantSound = () => {
+                if (!croissantSound) {
+                    return;
+                }
+
+                croissantSound.currentTime = 0;
+                croissantSound.play().catch(() => {});
+                if (croissantSoundTimer) {
+                    clearTimeout(croissantSoundTimer);
+                }
+                croissantSoundTimer = setTimeout(() => {
+                    croissantSound.pause();
+                }, 2000);
+            };
+
+            const unlockAudio = () => {
+                if (!croissantSound) {
+                    return;
+                }
+
+                croissantSound.play().then(() => {
+                    croissantSound.pause();
+                    croissantSound.currentTime = 0;
+                }).catch(() => {});
+
+                document.removeEventListener('pointerdown', unlockAudio);
+                document.removeEventListener('touchstart', unlockAudio);
+            };
+
+            document.addEventListener('pointerdown', unlockAudio, { once: true });
+            document.addEventListener('touchstart', unlockAudio, { once: true });
+
+            const toggleCroissant = () => {
+                croissantContainer.classList.toggle('active');
+                if (croissantContainer.classList.contains('active')) {
+                    playCroissantSound();
+                    if (infoPanelContent) {
+                        infoPanelContent.classList.add('revealed');
+                    }
+                    if (infoPanelSection) {
+                        infoPanelSection.classList.add('expanded');
+                    }
+                    if (infoPanel2Section) {
+                        infoPanel2Section.classList.add('separated');
+                    }
+                } else if (infoPanelContent) {
+                    infoPanelContent.classList.remove('revealed');
+                    if (infoPanelSection) {
+                        infoPanelSection.classList.remove('expanded');
+                    }
+                    if (infoPanel2Section) {
+                        infoPanel2Section.classList.remove('separated');
+                    }
+                }
+            };
+
+            croissantContainer.addEventListener('pointerdown', toggleCroissant);
+
+            // Optional: Add keyboard support
+            document.addEventListener('keydown', (e) => {
+                if (e.key === ' ') {
+                    e.preventDefault();
+                    croissantContainer.classList.toggle('active');
+                    if (croissantContainer.classList.contains('active')) {
+                        playCroissantSound();
+                        if (infoPanelContent) {
+                            infoPanelContent.classList.add('revealed');
+                        }
+                        if (infoPanelSection) {
+                            infoPanelSection.classList.add('expanded');
+                        }
+                        if (infoPanel2Section) {
+                            infoPanel2Section.classList.add('separated');
+                        }
+                    } else {
+                        if (infoPanelContent) {
+                            infoPanelContent.classList.remove('revealed');
+                        }
+                        if (infoPanelSection) {
+                            infoPanelSection.classList.remove('expanded');
+                        }
+                        if (infoPanel2Section) {
+                            infoPanel2Section.classList.remove('separated');
+                        }
+                    }
+                }
+            });
+        }
+
+        // Napkin/plate interaction
+        const napkinWindow = document.getElementById('napkinWindow');
+        const infoPanel2Content = document.getElementById('infoPanel2Content');
+        if (napkinWindow) {
+            napkinWindow.addEventListener('pointerdown', () => {
+                napkinWindow.classList.toggle('split');
+                if (infoPanel2Content) {
+                    infoPanel2Content.classList.toggle('revealed');
+                }
+                if (infoPanel2Section) {
+                    infoPanel2Section.classList.toggle('expanded');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
